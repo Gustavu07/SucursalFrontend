@@ -5,36 +5,41 @@ import type {
   UpdateHorarioDTO,
 } from "@/modules/horarios";
 
-export const personalService = {
+/**
+ * Servicio para gestionar los horarios.
+ * Hace las peticiones HTTP al backend (Spring Boot).
+ */
+export const horarioService = {
   getAll: async (): Promise<Horario[]> => {
-    const response = await axiosInstance.get("/personal");
+    const response = await axiosInstance.get("/horarios");
+    return response.data;
+  },
+
+  getBySucursal: async (sucursalId: number): Promise<Horario[]> => {
+    const response = await axiosInstance.get(
+      `/horarios/sucursal/${sucursalId}`
+    );
     return response.data;
   },
 
   getById: async (id: number): Promise<Horario> => {
-    const response = await axiosInstance.get(`/personal/${id}`);
+    const response = await axiosInstance.get(`/horarios/${id}`);
     return response.data;
   },
-
-  create: async (data: CreateHorarioDTO): Promise<Horario> => {
-    const response = await axiosInstance.post("/personal", data);
+  create: async (
+    sucursalId: number,
+    data: CreateHorarioDTO
+  ): Promise<Horario> => {
+    const response = await axiosInstance.post(`/horarios/${sucursalId}`, data);
     return response.data;
   },
 
   update: async (id: number, data: UpdateHorarioDTO): Promise<Horario> => {
-    const response = await axiosInstance.put(`/personal/${id}`, data);
+    const response = await axiosInstance.put(`/horarios/${id}`, data);
     return response.data;
   },
 
   delete: async (id: number): Promise<void> => {
-    await axiosInstance.delete(`/personal/${id}`);
-  },
-
-  //falta cambiar esto de aqui
-  asignarSucursal: async (id: number, sucursalId: number): Promise<Horario> => {
-    const response = await axiosInstance.put(`/personal/${id}/sucursal`, null, {
-      params: { sucursalId },
-    });
-    return response.data;
+    await axiosInstance.delete(`/horarios/${id}`);
   },
 };

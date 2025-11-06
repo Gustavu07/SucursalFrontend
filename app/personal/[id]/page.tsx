@@ -4,7 +4,7 @@ import { use } from "react";
 import { Spinner } from "@heroui/react";
 import { PersonalForm, usePersonalDetail } from "@/modules/personal";
 
-export default function EditarSucursalPage({
+export default function EditarPersonalPage({
   params,
 }: {
   params: Promise<{ id: string }>;

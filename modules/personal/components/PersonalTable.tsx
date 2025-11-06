@@ -177,7 +177,6 @@ export function PersonalTable() {
         </TableBody>
       </Table>
 
-      {/* Modal de confirmación de eliminación */}
       <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
         <ModalContent>
           {(onClose) => (

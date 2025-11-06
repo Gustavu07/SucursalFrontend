@@ -29,20 +29,6 @@
   --font-sans: "Inter", system-ui, sans-serif;
 }
 
-/* 4. Tema oscuro opcional */
-.dark {
-  --color-primary: #60a5fa;
-  --color-secondary: #818cf8;
-  --color-accent: #fbbf24;
-
-  --text-color-default: #f9fafb;
-  --text-color-light: #d1d5db;
-
-  --background-color-page: #0D1117;
-  --background-color-card: #1f2937;
-  --border-color-default: #374151;
-}
-
 /* 5. Estilos base */
 body {
   background: var(--background-color-page);

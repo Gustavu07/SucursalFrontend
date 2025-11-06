@@ -2,9 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from 'next/navigation';
-import {  Form,  Input,  Button,  Card,  CardBody,  CardHeader,  Divider,  Chip,  Select,  SelectItem,  addToast,
-} from '@heroui/react';
-import {  UserIcon,  EnvelopeIcon,  PhoneIcon,  PlusIcon,  BuildingOfficeIcon,} from '@heroicons/react/24/outline';
+import { Form, Input, Button, Card, CardBody, CardHeader, Divider, Chip, Select, SelectItem, addToast } from '@heroui/react';
+import { UserIcon, EnvelopeIcon, PhoneIcon, PlusIcon, BuildingOfficeIcon } from '@heroicons/react/24/outline';
 import { Personal, CreatePersonalDTO, UpdatePersonalDTO, usePersonalMutations } from "@/modules/personal";
 import { useSucursales } from "@/modules/sucursal";
 
@@ -17,7 +16,7 @@ export function PersonalForm({ personal }: PersonalFormProps) {
   const isEditMode = !!personal?.id;
   
   const { createAsync, updateAsync, isCreating, isUpdating, createError, updateError } = usePersonalMutations();
-  const { sucursales } = useSucursales();
+  const { sucursales, isLoading: loadingSucursales } = useSucursales();
 
   const [formData, setFormData] = useState({
     nombreCompleto: personal?.nombreCompleto || '',
@@ -45,6 +44,16 @@ export function PersonalForm({ personal }: PersonalFormProps) {
       newErrors.correoInstitucional = 'Correo electrónico inválido';
     }
 
+    // ✅ AGREGADO: Validar sucursal requerida solo al crear
+    if (!isEditMode && !formData.sucursalId) {
+      newErrors.sucursalId = 'La sucursal es requerida';
+    }
+
+    // ✅ AGREGADO: Validar al menos un teléfono
+    if (numerosTelefono.length === 0) {
+      newErrors.numerosTelefono = 'Debe agregar al menos un número de teléfono';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -53,6 +62,10 @@ export function PersonalForm({ personal }: PersonalFormProps) {
     if (nuevoTelefono.trim() && /^\d{7,15}$/.test(nuevoTelefono.replace(/\s/g, ''))) {
       setNumerosTelefono([...numerosTelefono, nuevoTelefono.trim()]);
       setNuevoTelefono('');
+      // Limpiar error de teléfonos si existía
+      if (errors.numerosTelefono) {
+        setErrors({ ...errors, numerosTelefono: '' });
+      }
     }
   };
 
@@ -67,28 +80,48 @@ export function PersonalForm({ personal }: PersonalFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validateForm()) return;
-
-    const data: CreatePersonalDTO | UpdatePersonalDTO = {
-      nombreCompleto: formData.nombreCompleto,
-      correoInstitucional: formData.correoInstitucional,
-      numerosTelefono,
-      numeroCorporativo: formData.numeroCorporativo || undefined,
-      sucursalId: formData.sucursalId ? Number(formData.sucursalId) : undefined,
-    };
+    if (!validateForm()) {
+      addToast({
+        title: 'Formulario incompleto',
+        description: 'Por favor completa todos los campos requeridos.',
+        variant: 'solid',
+      });
+      return;
+    }
 
     try {
       if (isEditMode) {
-        await updateAsync({ id: personal.id, data });
+        // ✅ CORREGIDO: UpdatePersonalDTO sin sucursalId
+        const updateData: UpdatePersonalDTO = {
+          nombreCompleto: formData.nombreCompleto,
+          correoInstitucional: formData.correoInstitucional,
+          numerosTelefono,
+          numeroCorporativo: formData.numeroCorporativo || null,
+        };
+        
+        await updateAsync({ id: personal.id, data: updateData });
         addToast({
           title: 'Personal actualizado',
           description: 'Los datos se han actualizado correctamente.',
+          variant: 'solid',
         });
       } else {
-        await createAsync(data as CreatePersonalDTO);
+        const createData: CreatePersonalDTO = {
+          nombreCompleto: formData.nombreCompleto,
+          correoInstitucional: formData.correoInstitucional,
+          numerosTelefono,
+          sucursalId: Number(formData.sucursalId), // Ya validamos que existe
+        };
+        
+        await createAsync({
+          sucursalId: Number(formData.sucursalId),
+          data: createData,
+        });
+        
         addToast({
           title: 'Personal creado',
           description: 'El personal se ha registrado correctamente.',
+          variant: 'solid',
         });
       }
       router.push('/personal');
@@ -96,7 +129,8 @@ export function PersonalForm({ personal }: PersonalFormProps) {
       console.error('Error al guardar:', error);
       addToast({
         title: 'Error',
-        description: 'Hubo un problema al guardar los datos.',
+        description: error instanceof Error ? error.message : 'Hubo un problema al guardar los datos.',
+        variant: 'solid',
       });
     }
   };
@@ -178,6 +212,8 @@ export function PersonalForm({ personal }: PersonalFormProps) {
                 onChange={(e) => setNuevoTelefono(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddTelefono())}
                 startContent={<PhoneIcon className="w-4 h-4 text-default-400" />}
+                isInvalid={!!errors.numerosTelefono}
+                errorMessage={errors.numerosTelefono}
               />
               <Button
                 color="primary"
@@ -218,6 +254,7 @@ export function PersonalForm({ personal }: PersonalFormProps) {
           <Divider />
           <CardBody className="space-y-4">
             <Select
+              isRequired={!isEditMode}
               label="Sucursal"
               labelPlacement="outside"
               placeholder="Selecciona una sucursal"
@@ -226,6 +263,10 @@ export function PersonalForm({ personal }: PersonalFormProps) {
                 setFormData({ ...formData, sucursalId: e.target.value })
               }
               startContent={<BuildingOfficeIcon className="w-4 h-4 text-default-400" />}
+              isInvalid={!!errors.sucursalId}
+              errorMessage={errors.sucursalId}
+              isDisabled={loadingSucursales || isEditMode}
+              description={isEditMode ? "No se puede cambiar la sucursal desde aquí" : undefined}
             >
               {sucursales.map((sucursal) => (
                 <SelectItem key={sucursal.id.toString()}>
@@ -252,6 +293,7 @@ export function PersonalForm({ personal }: PersonalFormProps) {
           <Button
             color="primary"
             type="submit"
+            isLoading={loading}
             isDisabled={loading}
           >
             {isEditMode ? 'Actualizar' : 'Guardar'}
@@ -261,7 +303,10 @@ export function PersonalForm({ personal }: PersonalFormProps) {
             color="danger"
             variant="light"
             onPress={handleCancel}
-          > Cancelar </Button>
+            isDisabled={loading}
+          >
+            Cancelar
+          </Button>
         </div>
       </Form>
     </div>

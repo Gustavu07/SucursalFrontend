@@ -44,8 +44,15 @@ export function usePersonalMutations() {
     queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
   };
 
+  // ✅ CORREGIDO: Ahora acepta sucursalId
   const createMutation = useMutation({
-    mutationFn: (data: CreatePersonalDTO) => personalService.create(data),
+    mutationFn: ({
+      sucursalId,
+      data,
+    }: {
+      sucursalId: number;
+      data: CreatePersonalDTO;
+    }) => personalService.create(sucursalId, data),
     onSuccess: () => invalidateCache(),
     onError: (error) => console.error("Error creating personal:", error),
   });
@@ -70,6 +77,19 @@ export function usePersonalMutations() {
     onError: (error) => console.error("Error asignando sucursal:", error),
   });
 
+  // ✅ OPCIONAL: Agregar reasignar si lo necesitas
+  const reasignarSucursalMutation = useMutation({
+    mutationFn: ({
+      id,
+      nuevaSucursalId,
+    }: {
+      id: number;
+      nuevaSucursalId: number;
+    }) => personalService.reasignarSucursal(id, nuevaSucursalId),
+    onSuccess: () => invalidateCache(),
+    onError: (error) => console.error("Error reasignando sucursal:", error),
+  });
+
   return {
     createAsync: createMutation.mutateAsync,
     isCreating: createMutation.isPending,
@@ -85,11 +105,17 @@ export function usePersonalMutations() {
 
     asignarSucursal: asignarSucursalMutation.mutate,
     isAssigning: asignarSucursalMutation.isPending,
+    assignError: asignarSucursalMutation.error?.message,
+
+    // ✅ OPCIONAL: Exportar reasignar
+    reasignarSucursal: reasignarSucursalMutation.mutate,
+    isReassigning: reasignarSucursalMutation.isPending,
 
     isPending:
       createMutation.isPending ||
       updateMutation.isPending ||
       deleteMutation.isPending ||
-      asignarSucursalMutation.isPending,
+      asignarSucursalMutation.isPending ||
+      reasignarSucursalMutation.isPending,
   };
 }
