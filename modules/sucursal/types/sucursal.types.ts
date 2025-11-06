@@ -34,8 +34,6 @@ export interface UpdateSucursalDTO {
 }
 
 export interface SucursalLandingData extends Sucursal {
-  horarios: Horario[];
-  numerosContacto: string[];
   personalVisible?: PersonalPublico[];
 }
 
