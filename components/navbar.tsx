@@ -3,8 +3,6 @@
 import React from "react";
 import {  Navbar,  NavbarBrand,  NavbarContent,  NavbarItem,  NavbarMenu,  NavbarMenuItem,  NavbarMenuToggle,
   Link,  Divider,} from "@heroui/react";
-import { cn } from "@heroui/react";
-import { BuildingStorefrontIcon } from "@heroicons/react/24/solid"; 
 
 const menuItems = [
   { name: "Inicio", href: "/" },
@@ -19,20 +17,15 @@ export default function SucursalNavbar() {
 
   return (
     <Navbar
-      classNames={{
-        base: cn("border-default-100", {
-          "bg-default-200/50 dark:bg-default-100/50": isMenuOpen,
-        }),
-        wrapper: "w-full justify-between",
-        item: "hidden md:flex",
-      }}
-      height="60px"
+      maxWidth="xl"
+      className="bg-white shadow-md border-b border-gray-100"
       isMenuOpen={isMenuOpen}
       onMenuOpenChange={setIsMenuOpen}
     >
-      <NavbarBrand>
-        <BuildingStorefrontIcon className="h-6 w-6 text-primary" />
-        <span className="ml-2 font-semibold text-base">Sistema Sucursales</span>
+      <NavbarBrand className="flex items-center gap-2">
+        <span className="font-semibold text-gray-800 text-lg">
+          Sistema Sucursales
+        </span>
       </NavbarBrand>
 
       <NavbarContent justify="center" className="hidden md:flex gap-6">
@@ -40,7 +33,7 @@ export default function SucursalNavbar() {
           <NavbarItem key={item.name}>
             <Link
               href={item.href}
-              className="text-default-600 hover:text-primary transition-colors"
+              className="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200"
             >
               {item.name}
             </Link>
@@ -48,19 +41,25 @@ export default function SucursalNavbar() {
         ))}
       </NavbarContent>
 
-      <NavbarMenuToggle className="text-default-500 md:hidden" />
+      <NavbarMenuToggle
+        aria-label={isMenuOpen ? "Cerrar menú" : "Abrir menú"}
+        className="md:hidden text-gray-600"
+      />
 
-      <NavbarMenu className="bg-default-200/50 shadow-medium dark:bg-default-100/50 pt-6 pb-6 backdrop-blur-md backdrop-saturate-150">
+      {/* Menú móvil */}
+      <NavbarMenu className="bg-white shadow-lg mt-2 rounded-lg border border-gray-100 py-4">
         {menuItems.map((item, index) => (
-          <NavbarMenuItem key={item.name}>
+          <NavbarMenuItem key={item.name} className="px-4">
             <Link
-              className="text-default-600 mb-2 w-full"
+              className="block text-gray-700 hover:text-blue-600 font-medium py-2 transition-colors duration-200"
               href={item.href}
               size="md"
             >
               {item.name}
             </Link>
-            {index < menuItems.length - 1 && <Divider className="opacity-50" />}
+            {index < menuItems.length - 1 && (
+              <Divider className="opacity-50 my-2" />
+            )}
           </NavbarMenuItem>
         ))}
       </NavbarMenu>
