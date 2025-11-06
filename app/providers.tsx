@@ -1,6 +1,7 @@
-"use client";
+'use client';
 
-import { HeroUIProvider } from "@heroui/react";
+import { HeroUIProvider, ToastProvider } from '@heroui/react';
+import { ThemeProvider } from 'next-themes';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useState } from 'react';
 
@@ -8,7 +9,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient({
     defaultOptions: {
       queries: {
-        staleTime: 60 * 1000, // 1 minuto
+        staleTime: 60 * 1000,
         refetchOnWindowFocus: false,
         retry: 1,
       },
@@ -17,9 +18,12 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <HeroUIProvider>
-        {children}
-      </HeroUIProvider>
+      <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
+        <HeroUIProvider>
+          <ToastProvider placement="top-center" />
+          {children}
+        </HeroUIProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }
