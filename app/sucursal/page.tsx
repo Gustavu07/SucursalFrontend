@@ -1,0 +1,22 @@
+import { Divider } from "@heroui/react";
+import { SucursalWrapper } from "@/modules/sucursal";
+
+/**
+ * Página principal de Sucursales.
+ * Es un Server Component para la optimización de Next.js.
+ * Delega la interactividad a SucursalWrapper.
+ */
+export default function SucursalPage() {
+  return (
+    <div className="container max-w-7xl mx-auto py-10">
+      <div className="space-y-1">
+        <h2 className="text-3xl font-bold tracking-tight">Sucursales</h2>
+        <p className="text-default-500">
+          Crea, edita y elimina las sucursales de tu negocio.
+        </p>
+      </div>
+      <Divider className="my-6" />
+      <SucursalWrapper />
+    </div>
+  );
+}
