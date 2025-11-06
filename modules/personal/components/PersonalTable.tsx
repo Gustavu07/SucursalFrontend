@@ -15,7 +15,7 @@ export function PersonalTable() {
   const [personalToDelete, setPersonalToDelete] = useState<number | null>(null);
 
   const handleEdit = (id: number) => {
-    router.push(`/personal/${id}/editar`);
+    router.push(`/personal/${id}`);
   };
 
   const handleDeleteClick = (id: number) => {

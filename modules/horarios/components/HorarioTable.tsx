@@ -55,7 +55,7 @@ export function HorarioTable() {
   const [horarioToDelete, setHorarioToDelete] = useState<number | null>(null);
 
   const handleEdit = (id: number) => {
-    router.push(`/horarios/${id}/editar`);
+    router.push(`/horarios/${id}`);
   };
 
   const handleDeleteClick = (id: number) => {
