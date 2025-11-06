@@ -6,7 +6,7 @@ import {  Navbar,  NavbarBrand,  NavbarContent,  NavbarItem,  NavbarMenu,  Navba
 
 const menuItems = [
   { name: "Inicio", href: "/" },
-  { name: "Sucursales", href: "/sucursal" },
+  { name: "Sucursales", href: "/sucursales" },
   { name: "Personal", href: "/personal" },
   { name: "Horarios", href: "/horarios" },
   { name: "Reportes", href: "/reportes" },

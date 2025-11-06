@@ -1,5 +1,4 @@
 export * from "./client/SucursalWrapper";
-export * from "./components/SucursalDialog";
 export * from "./components/SucursalForm";
 export * from "./components/SucursalTable";
 export * from "./hooks/useSucursales";

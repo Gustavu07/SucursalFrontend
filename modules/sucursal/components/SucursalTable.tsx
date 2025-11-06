@@ -1,14 +1,16 @@
 "use client";
 
+import { useRouter } from 'next/navigation';
 import {  Table,  TableHeader,  TableColumn,  TableBody,  TableRow,  TableCell,  Chip,  Tooltip,  Button,  Spinner,} from '@heroui/react';
 import {  PencilIcon,  TrashIcon,  EyeIcon,  MapPinIcon,} from '@heroicons/react/24/outline';
-import { useSucursales, useSucursalMutations, Sucursal, SucursalDialog } from "@/modules/sucursal";
+import { useSucursales, useSucursalMutations, Sucursal } from "@/modules/sucursal";
 
 interface SucursalTableProps {
   onView?: (sucursal: Sucursal) => void;
 }
 
 export function SucursalTable({ onView }: SucursalTableProps) {
+  const router = useRouter();
   const { sucursales, isLoading } = useSucursales();
   const { toggleActive, isToggling, remove, isDeleting } = useSucursalMutations();
 
@@ -20,6 +22,10 @@ export function SucursalTable({ onView }: SucursalTableProps) {
     if (confirm('¿Estás seguro de eliminar esta sucursal?')) {
       remove(id);
     }
+  };
+
+  const handleEdit = (id: number) => {
+    router.push(`/sucursales/${id}`);
   };
 
   const columns = [
@@ -102,18 +108,18 @@ export function SucursalTable({ onView }: SucursalTableProps) {
               </Tooltip>
             )}
 
-            <SucursalDialog sucursal={sucursal}>
-              <Tooltip content="Editar">
-                <Button
-                  isIconOnly
-                  size="sm"
-                  variant="light"
-                  color="primary"
-                >
-                  <PencilIcon className="w-5 h-5" />
-                </Button>
-              </Tooltip>
-            </SucursalDialog>
+            {/* ✅ Botón editar ahora navega en lugar de abrir modal */}
+            <Tooltip content="Editar">
+              <Button
+                isIconOnly
+                size="sm"
+                variant="light"
+                color="primary"
+                onPress={() => handleEdit(sucursal.id)}
+              >
+                <PencilIcon className="w-5 h-5" />
+              </Button>
+            </Tooltip>
 
             <Tooltip content="Eliminar" color="danger">
               <Button

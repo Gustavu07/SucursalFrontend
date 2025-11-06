@@ -1,23 +1,28 @@
 "use client";
 
 import { useState } from "react";
-import {  Input,  Button,  Card,  CardBody,  CardHeader,  Divider,  Chip,} from '@heroui/react';
-import {  MapPinIcon,  PhoneIcon,  PlusIcon} from '@heroicons/react/24/outline';
+import { useRouter } from 'next/navigation';
+import { Input, Button, Card, CardBody, CardHeader, Divider, Chip } from '@heroui/react';
+import { MapPinIcon, PhoneIcon, PlusIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
 import { Sucursal, CreateSucursalDTO, UpdateSucursalDTO, useSucursalMutations } from "@/modules/sucursal";
-
 
 interface SucursalFormProps {
   sucursal?: Sucursal;
-  onSuccess?: () => void;
-  onCancel?: () => void;
 }
 
-export function SucursalForm({ sucursal, onSuccess, onCancel }: SucursalFormProps) {
+export function SucursalForm({ sucursal }: SucursalFormProps) {
+  const router = useRouter();
   const isEditing = !!sucursal?.id;
-  const { create, update, isCreating, isUpdating, createError, updateError } =
-    useSucursalMutations();
+  
+  const { 
+    createAsync, 
+    updateAsync, 
+    isCreating, 
+    isUpdating, 
+    createError, 
+    updateError 
+  } = useSucursalMutations();
 
-  // Form state
   const [formData, setFormData] = useState({
     direccion: sucursal?.direccion || '',
     telefono: sucursal?.telefono || '',
@@ -27,7 +32,8 @@ export function SucursalForm({ sucursal, onSuccess, onCancel }: SucursalFormProp
   });
 
   const [numerosContacto, setNumerosContacto] = useState<string[]>(
-  sucursal?.numerosContacto || [] );
+    sucursal?.numerosContacto || []
+  );
   const [nuevoContacto, setNuevoContacto] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -79,6 +85,10 @@ export function SucursalForm({ sucursal, onSuccess, onCancel }: SucursalFormProp
     setNumerosContacto(numerosContacto.filter((_, i) => i !== index));
   };
 
+  const handleCancel = () => {
+    router.push('/sucursales');
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -95,11 +105,11 @@ export function SucursalForm({ sucursal, onSuccess, onCancel }: SucursalFormProp
 
     try {
       if (isEditing) {
-        await update({ id: sucursal.id, data });
+        await updateAsync({ id: sucursal.id, data });
       } else {
-        await create(data as CreateSucursalDTO);
+        await createAsync(data as CreateSucursalDTO);
       }
-      onSuccess?.();
+      router.push('/sucursales');
     } catch (error) {
       console.error('Error al guardar:', error);
     }
@@ -109,156 +119,179 @@ export function SucursalForm({ sucursal, onSuccess, onCancel }: SucursalFormProp
   const error = createError || updateError;
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      {error && (
-        <Card className="bg-danger-50 border-danger-200">
-          <CardBody>
-            <p className="text-danger text-sm">{error}</p>
+    <div className="max-w-4xl mx-auto">
+      <div className="mb-6 flex items-center gap-4">
+        <Button
+          isIconOnly
+          variant="light"
+          onPress={handleCancel}
+          isDisabled={isPending}
+        >
+          <ArrowLeftIcon className="w-5 h-5" />
+        </Button>
+        <div>
+          <h1 className="text-2xl font-bold">
+            {isEditing ? 'Editar Sucursal' : 'Nueva Sucursal'}
+          </h1>
+          <p className="text-sm text-default-500">
+            {isEditing
+              ? `Modifica los datos de la sucursal: ${sucursal.direccion}`
+              : 'Completa la información para crear una nueva sucursal'}
+          </p>
+        </div>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {error && (
+          <Card className="bg-danger-50 border-danger-200">
+            <CardBody>
+              <p className="text-danger text-sm">{error}</p>
+            </CardBody>
+          </Card>
+        )}
+
+        <Card>
+          <CardHeader>
+            <h3 className="text-lg font-semibold">Información Básica</h3>
+          </CardHeader>
+          <Divider />
+          <CardBody className="space-y-4">
+            <Input
+              label="Dirección"
+              placeholder="Av. Principal #123, Zona Centro"
+              value={formData.direccion}
+              onChange={(e) =>
+                setFormData({ ...formData, direccion: e.target.value })
+              }
+              isInvalid={!!errors.direccion}
+              errorMessage={errors.direccion}
+              isRequired
+              startContent={<MapPinIcon className="w-4 h-4 text-default-400" />}
+            />
+
+            <Input
+              label="Teléfono Principal"
+              placeholder="12345678"
+              value={formData.telefono}
+              onChange={(e) =>
+                setFormData({ ...formData, telefono: e.target.value })
+              }
+              isInvalid={!!errors.telefono}
+              errorMessage={errors.telefono}
+              isRequired
+              startContent={<PhoneIcon className="w-4 h-4 text-default-400" />}
+            />
+
+            <Input
+              label="URL de Imagen"
+              placeholder="https://ejemplo.com/imagen.jpg"
+              value={formData.imagenUrl}
+              onChange={(e) =>
+                setFormData({ ...formData, imagenUrl: e.target.value })
+              }
+              description="Imagen para mostrar en la landing"
+            />
           </CardBody>
         </Card>
-      )}
 
-      {/* Información básica */}
-      <Card>
-        <CardHeader>
-          <h3 className="text-lg font-semibold">Información Básica</h3>
-        </CardHeader>
-        <Divider />
-        <CardBody className="space-y-4">
-          <Input
-            label="Dirección"
-            placeholder="Av. Principal #123, Zona Centro"
-            value={formData.direccion}
-            onChange={(e) =>
-              setFormData({ ...formData, direccion: e.target.value })
-            }
-            isInvalid={!!errors.direccion}
-            errorMessage={errors.direccion}
-            isRequired
-            startContent={<MapPinIcon className="w-4 h-4 text-default-400" />}
-          />
+        <Card>
+          <CardHeader>
+            <h3 className="text-lg font-semibold">Ubicación GPS</h3>
+          </CardHeader>
+          <Divider />
+          <CardBody className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <Input
+                type="number"
+                step="any"
+                label="Latitud"
+                placeholder="-17.7833"
+                value={formData.latitud}
+                onChange={(e) =>
+                  setFormData({ ...formData, latitud: e.target.value })
+                }
+                isInvalid={!!errors.latitud}
+                errorMessage={errors.latitud}
+                isRequired
+              />
 
-          <Input
-            label="Teléfono Principal"
-            placeholder="12345678"
-            value={formData.telefono}
-            onChange={(e) =>
-              setFormData({ ...formData, telefono: e.target.value })
-            }
-            isInvalid={!!errors.telefono}
-            errorMessage={errors.telefono}
-            isRequired
-            startContent={<PhoneIcon className="w-4 h-4 text-default-400" />}
-          />
-
-          <Input
-            label="URL de Imagen"
-            placeholder="https://ejemplo.com/imagen.jpg"
-            value={formData.imagenUrl}
-            onChange={(e) =>
-              setFormData({ ...formData, imagenUrl: e.target.value })
-            }
-            description="Imagen para mostrar en la landing"
-          />
-        </CardBody>
-      </Card>
-
-      {/* Ubicación */}
-      <Card>
-        <CardHeader>
-          <h3 className="text-lg font-semibold">Ubicación GPS</h3>
-        </CardHeader>
-        <Divider />
-        <CardBody className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <Input
-              type="number"
-              step="any"
-              label="Latitud"
-              placeholder="-17.7833"
-              value={formData.latitud}
-              onChange={(e) =>
-                setFormData({ ...formData, latitud: e.target.value })
-              }
-              isInvalid={!!errors.latitud}
-              errorMessage={errors.latitud}
-              isRequired
-            />
-
-            <Input
-              type="number"
-              step="any"
-              label="Longitud"
-              placeholder="-63.1821"
-              value={formData.longitud}
-              onChange={(e) =>
-                setFormData({ ...formData, longitud: e.target.value })
-              }
-              isInvalid={!!errors.longitud}
-              errorMessage={errors.longitud}
-              isRequired
-            />
-          </div>
-        </CardBody>
-      </Card>
-
-      {/* Números de Contacto */}
-      <Card>
-        <CardHeader>
-          <h3 className="text-lg font-semibold">Números de Contacto</h3>
-        </CardHeader>
-        <Divider />
-        <CardBody className="space-y-4">
-          <div className="flex gap-2">
-            <Input
-              placeholder="Agregar número de contacto"
-              value={nuevoContacto}
-              onChange={(e) => setNuevoContacto(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddContacto())}
-            />
-            <Button
-              color="primary"
-              variant="flat"
-              onPress={handleAddContacto}
-              isIconOnly
-            >
-              <PlusIcon className="w-5 h-5" />
-            </Button>
-          </div>
-
-          {numerosContacto.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {numerosContacto.map((numero, index) => (
-                <Chip
-                  key={index}
-                  onClose={() => handleRemoveContacto(index)}
-                  variant="flat"
-                  color="primary"
-                >
-                  {numero}
-                </Chip>
-              ))}
+              <Input
+                type="number"
+                step="any"
+                label="Longitud"
+                placeholder="-63.1821"
+                value={formData.longitud}
+                onChange={(e) =>
+                  setFormData({ ...formData, longitud: e.target.value })
+                }
+                isInvalid={!!errors.longitud}
+                errorMessage={errors.longitud}
+                isRequired
+              />
             </div>
-          )}
+          </CardBody>
+        </Card>
 
-          {numerosContacto.length === 0 && (
-            <p className="text-sm text-default-400">
-              No hay números de contacto agregados
-            </p>
-          )}
-        </CardBody>
-      </Card>
+        <Card>
+          <CardHeader>
+            <h3 className="text-lg font-semibold">Números de Contacto</h3>
+          </CardHeader>
+          <Divider />
+          <CardBody className="space-y-4">
+            <div className="flex gap-2">
+              <Input
+                placeholder="Agregar número de contacto"
+                value={nuevoContacto}
+                onChange={(e) => setNuevoContacto(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddContacto())}
+              />
+              <Button
+                color="primary"
+                variant="flat"
+                onPress={handleAddContacto}
+                isIconOnly
+              >
+                <PlusIcon className="w-5 h-5" />
+              </Button>
+            </div>
 
-      <div className="flex justify-end gap-2">
-        {onCancel && (
-          <Button variant="flat" onPress={onCancel} isDisabled={isPending}>
+            {numerosContacto.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {numerosContacto.map((numero, index) => (
+                  <Chip
+                    key={index}
+                    onClose={() => handleRemoveContacto(index)}
+                    variant="flat"
+                    color="primary"
+                  >
+                    {numero}
+                  </Chip>
+                ))}
+              </div>
+            )}
+
+            {numerosContacto.length === 0 && (
+              <p className="text-sm text-default-400">
+                No hay números de contacto agregados
+              </p>
+            )}
+          </CardBody>
+        </Card>
+
+        {/* ✅ Botones actualizados */}
+        <div className="flex justify-end gap-2">
+          <Button 
+            variant="flat" 
+            onPress={handleCancel} 
+            isDisabled={isPending}
+          >
             Cancelar
           </Button>
-        )}
-        <Button color="primary" type="submit" isLoading={isPending}>
-          {isEditing ? 'Actualizar Sucursal' : 'Crear Sucursal'}
-        </Button>
-      </div>
-    </form>
+          <Button color="primary" type="submit" isLoading={isPending}>
+            {isEditing ? 'Actualizar Sucursal' : 'Crear Sucursal'}
+          </Button>
+        </div>
+      </form>
+    </div>
   );
 }
