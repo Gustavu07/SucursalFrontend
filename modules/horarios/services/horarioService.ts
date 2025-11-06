@@ -1,27 +1,27 @@
 import axiosInstance from "@/lib/axios";
 import type {
-  Personal,
-  CreatePersonalDTO,
-  UpdatePersonalDTO,
-} from "@/modules/personal";
+  Horario,
+  CreateHorarioDTO,
+  UpdateHorarioDTO,
+} from "@/modules/horarios";
 
 export const personalService = {
-  getAll: async (): Promise<Personal[]> => {
+  getAll: async (): Promise<Horario[]> => {
     const response = await axiosInstance.get("/personal");
     return response.data;
   },
 
-  getById: async (id: number): Promise<Personal> => {
+  getById: async (id: number): Promise<Horario> => {
     const response = await axiosInstance.get(`/personal/${id}`);
     return response.data;
   },
 
-  create: async (data: CreatePersonalDTO): Promise<Personal> => {
+  create: async (data: CreateHorarioDTO): Promise<Horario> => {
     const response = await axiosInstance.post("/personal", data);
     return response.data;
   },
 
-  update: async (id: number, data: UpdatePersonalDTO): Promise<Personal> => {
+  update: async (id: number, data: UpdateHorarioDTO): Promise<Horario> => {
     const response = await axiosInstance.put(`/personal/${id}`, data);
     return response.data;
   },
@@ -30,10 +30,8 @@ export const personalService = {
     await axiosInstance.delete(`/personal/${id}`);
   },
 
-  asignarSucursal: async (
-    id: number,
-    sucursalId: number
-  ): Promise<Personal> => {
+  //falta cambiar esto de aqui
+  asignarSucursal: async (id: number, sucursalId: number): Promise<Horario> => {
     const response = await axiosInstance.put(`/personal/${id}/sucursal`, null, {
       params: { sucursalId },
     });

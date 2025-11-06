@@ -1,8 +1,13 @@
 "use client";
 
 import { useRouter } from 'next/navigation';
-import {  Table,  TableHeader,  TableColumn,  TableBody,  TableRow,  TableCell,  Chip,  Tooltip,  Button,  Spinner,} from '@heroui/react';
-import {  PencilIcon,  TrashIcon,  EyeIcon,  MapPinIcon,} from '@heroicons/react/24/outline';
+import {
+  Table, TableHeader, TableColumn, TableBody, TableRow, TableCell,
+  Chip, Tooltip, Button, Spinner
+} from '@heroui/react';
+import {
+  PencilIcon, TrashIcon, EyeIcon, MapPinIcon
+} from '@heroicons/react/24/outline';
 import { useSucursales, useSucursalMutations, Sucursal } from "@/modules/sucursal";
 
 interface SucursalTableProps {
@@ -42,23 +47,19 @@ export function SucursalTable({ onView }: SucursalTableProps) {
       case 'direccion':
         return (
           <div className="flex flex-col">
-            <p className="text-bold text-sm">{sucursal.direccion}</p>
-            <p className="text-xs text-default-500">ID: {sucursal.id}</p>
+            <p className="font-medium text-gray-900">{sucursal.direccion}</p>
+            <p className="text-xs text-gray-400">ID: {sucursal.id}</p>
           </div>
         );
 
       case 'telefono':
-        return (
-          <div className="flex flex-col gap-1">
-            <p className="text-sm">{sucursal.telefono}</p>
-          </div>
-        );
+        return <p className="text-gray-700">{sucursal.telefono}</p>;
 
       case 'ubicacion':
         return (
-          <div className="flex items-center gap-2">
-            <MapPinIcon className="w-4 h-4 text-default-400" />
-            <div className="flex flex-col text-xs">
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <MapPinIcon className="w-4 h-4 text-gray-400" />
+            <div className="flex flex-col">
               <span>Lat: {sucursal.latitud.toFixed(4)}</span>
               <span>Lng: {sucursal.longitud.toFixed(4)}</span>
             </div>
@@ -66,16 +67,12 @@ export function SucursalTable({ onView }: SucursalTableProps) {
         );
 
       case 'contactos':
-        return (
-          <div className="flex flex-col gap-1">
-            {sucursal.numerosContacto.length > 0 ? (
-              <Chip size="sm" variant="flat" color="primary">
-                {sucursal.numerosContacto.length} contactos
-              </Chip>
-            ) : (
-              <span className="text-xs text-default-400">Sin contactos</span>
-            )}
-          </div>
+        return sucursal.numerosContacto.length > 0 ? (
+          <Chip size="sm" variant="flat" color="primary">
+            {sucursal.numerosContacto.length} contactos
+          </Chip>
+        ) : (
+          <span className="text-xs text-gray-400 italic">Sin contactos</span>
         );
 
       case 'estado':
@@ -103,12 +100,10 @@ export function SucursalTable({ onView }: SucursalTableProps) {
                   variant="light"
                   onPress={() => onView(sucursal)}
                 >
-                  <EyeIcon className="w-5 h-5" />
+                  <EyeIcon className="w-5 h-5 text-gray-600" />
                 </Button>
               </Tooltip>
             )}
-
-            {/* ✅ Botón editar ahora navega en lugar de abrir modal */}
             <Tooltip content="Editar">
               <Button
                 isIconOnly
@@ -120,7 +115,6 @@ export function SucursalTable({ onView }: SucursalTableProps) {
                 <PencilIcon className="w-5 h-5" />
               </Button>
             </Tooltip>
-
             <Tooltip content="Eliminar" color="danger">
               <Button
                 isIconOnly
@@ -152,9 +146,9 @@ export function SucursalTable({ onView }: SucursalTableProps) {
   if (sucursales.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-2">
-        <MapPinIcon className="w-12 h-12 text-default-300" />
-        <p className="text-default-500">No hay sucursales registradas</p>
-        <p className="text-sm text-default-400">
+        <MapPinIcon className="w-12 h-12 text-gray-300" />
+        <p className="text-gray-500">No hay sucursales registradas</p>
+        <p className="text-sm text-gray-400">
           Crea tu primera sucursal para comenzar
         </p>
       </div>
@@ -162,28 +156,37 @@ export function SucursalTable({ onView }: SucursalTableProps) {
   }
 
   return (
-    <Table
-      aria-label="Tabla de sucursales"
-      classNames={{
-        wrapper: 'shadow-md',
-      }}
-    >
-      <TableHeader columns={columns}>
-        {(column) => (
-          <TableColumn key={column.key} align={column.key === 'actions' ? 'center' : 'start'}>
-            {column.label}
-          </TableColumn>
-        )}
-      </TableHeader>
-      <TableBody items={sucursales}>
-        {(item) => (
-          <TableRow key={item.id}>
-            {(columnKey) => (
-              <TableCell>{renderCell(item, columnKey as string)}</TableCell>
+    <div className="bg-gray-50 rounded-xl border border-gray-200 shadow-sm p-4">
+      <h2 className="text-xl font-semibold text-gray-800 mb-4">Sucursales</h2>
+
+      <div className="bg-white rounded-lg border border-gray-100 shadow-sm overflow-hidden">
+        <Table
+          aria-label="Tabla de sucursales"
+          classNames={{
+            base: "min-w-full divide-y divide-gray-100",
+            wrapper: "overflow-hidden",
+            th: "bg-gray-50 text-gray-600 font-semibold text-sm uppercase tracking-wide",
+            td: "text-sm text-gray-700",
+          }}
+        >
+          <TableHeader columns={columns}>
+            {(column) => (
+              <TableColumn key={column.key} align={column.key === 'actions' ? 'center' : 'start'}>
+                {column.label}
+              </TableColumn>
             )}
-          </TableRow>
-        )}
-      </TableBody>
-    </Table>
+          </TableHeader>
+          <TableBody items={sucursales}>
+            {(item) => (
+              <TableRow key={item.id} className="hover:bg-gray-50 transition-colors">
+                {(columnKey) => (
+                  <TableCell>{renderCell(item, columnKey as string)}</TableCell>
+                )}
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+    </div>
   );
 }

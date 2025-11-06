@@ -26,7 +26,6 @@ export interface UpdatePersonalDTO {
 
 export interface ReasignarPersonalDTO {
   nuevoSucursalId: number;
-  // IMPORTANTE: El numeroCorporativo se eliminará automáticamente
 }
 
 export interface AsignarNumeroCorporativoDTO {
